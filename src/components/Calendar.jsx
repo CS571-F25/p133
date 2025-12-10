@@ -2,6 +2,7 @@ import Navbar from './Navbar';
 import EventModal from './EventModal';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
+import './Calendar.css';
 
 export default function Calendar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -9,7 +10,12 @@ export default function Calendar() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [events, setEvents] = useState({});
     const [showModal, setShowModal] = useState(false);
-    const [viewMode, setViewMode] = useState('month'); // 'year', 'month', 'day'
+
+    // Year Selection Drawer State
+    const [showYearDrawer, setShowYearDrawer] = useState(false);
+
+    const [viewMode, setViewMode] = useState('year');
+    const [direction, setDirection] = useState('forward');
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
@@ -18,19 +24,20 @@ export default function Calendar() {
     useEffect(() => {
         const currentUser = localStorage.getItem('currentUser');
         setIsLoggedIn(!!currentUser);
-        
+
         if (currentUser) {
             const savedEvents = localStorage.getItem(`events_${currentUser}`);
             if (savedEvents) {
                 setEvents(JSON.parse(savedEvents));
             }
-            
-            // Apply saved settings
+
             const savedSettings = localStorage.getItem(`settings_${currentUser}`);
             if (savedSettings) {
                 const settings = JSON.parse(savedSettings);
-                if (settings.backgroundColor) {
-                    document.body.style.backgroundColor = settings.backgroundColor;
+                if (settings.mode === 'night') {
+                    document.body.classList.add('night-mode');
+                } else {
+                    document.body.classList.remove('night-mode');
                 }
             }
         }
@@ -42,41 +49,251 @@ export default function Calendar() {
     const getDaysInMonth = (m, y) => new Date(y, m + 1, 0).getDate();
     const getFirstDayOfMonth = (m, y) => new Date(y, m, 1).getDay();
 
-    const previousMonth = () => {
-        setCurrentDate(new Date(year, month - 1, 1));
-    };
-
-    const nextMonth = () => {
-        setCurrentDate(new Date(year, month + 1, 1));
+    const handleMonthClick = (monthIndex) => {
+        setCurrentDate(new Date(year, monthIndex, 1));
+        setDirection('forward');
+        setViewMode('month');
+        setSelectedDate(null);
     };
 
     const handleDateClick = (day) => {
         setSelectedDate(day);
+        setDirection('forward');
         setViewMode('day');
     };
 
-    const handleMonthClick = (monthIndex) => {
-        setCurrentDate(new Date(year, monthIndex, 1));
-        setViewMode('month');
+    const handleBackToYear = () => {
+        setDirection('backward');
+        setViewMode('year');
+        setSelectedDate(null);
     };
 
-    const saveEvent = (eventText) => {
+    const handleBackToMonth = () => {
+        setDirection('backward'); // Corrected direction for going back
+        setViewMode('month');
+        setSelectedDate(null);
+    };
+
+
+    const renderSidebar = () => {
+        if (viewMode === 'year') {
+            return null;
+        }
+
+        if (viewMode === 'month') {
+            return (
+                <div className="sidebar-list">
+                    <h3 className="sidebar-year">{year}</h3>
+                    <div className="sidebar-scroll">
+                        {monthNames.map((mName, idx) => (
+                            <div
+                                key={idx}
+                                className={`sidebar-item ${month === idx ? 'active' : ''}`}
+                                onClick={() => handleMonthClick(idx)}
+                            >
+                                {mName}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        if (viewMode === 'day' && selectedDate) {
+            // Expand context to +/- 4 days (total 9 days range)
+            const daysToShow = [];
+            for (let i = -4; i <= 4; i++) {
+                const d = new Date(year, month, selectedDate + i);
+                daysToShow.push(d);
+            }
+
+            return (
+                <div className="sidebar-list">
+                    <button onClick={handleBackToMonth} className="btn-back-sidebar">
+                        ← {monthNames[month]}
+                    </button>
+                    <div className="sidebar-days-context">
+                        {daysToShow.map((dateObj, idx) => {
+                            const d = dateObj.getDate();
+                            const m = dateObj.getMonth();
+                            const isSelected = d === selectedDate && m === month;
+
+                            return (
+                                <div
+                                    key={idx}
+                                    className={`sidebar-day-item ${isSelected ? 'active-day' : ''}`}
+                                    onClick={() => {
+                                        if (m !== month) {
+                                            setCurrentDate(new Date(year, m, 1));
+                                        }
+                                        setSelectedDate(d);
+                                    }}
+                                >
+                                    <div className="day-name">{dayNames[dateObj.getDay()].substring(0, 3)}</div>
+                                    <div className="day-num">{d}</div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {/* Add scroll indicators if needed, or rely on overflow */}
+                </div>
+            );
+        }
+        return null;
+    };
+
+    const renderHeaderTitle = () => {
+        if (viewMode === 'year') {
+            return (
+                <div className="year-navigator">
+                    <button onClick={() => setCurrentDate(new Date(year - 1, month, 1))} className="nav-arrow">
+                        ‹
+                    </button>
+
+                    <div className="year-drawer-container">
+                        <h1
+                            className="calendar-title year-clickable"
+                            onClick={() => setShowYearDrawer(!showYearDrawer)}
+                        >
+                            {year} <span style={{ fontSize: '1rem' }}>▼</span>
+                        </h1>
+
+                        {showYearDrawer && (
+                            <div className="year-drawer glass-card">
+                                <div className="year-grid-select">
+                                    {Array.from({ length: 12 }, (_, i) => year - 4 + i).map(y => (
+                                        <div
+                                            key={y}
+                                            className={`year-option ${y === year ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setCurrentDate(new Date(y, month, 1));
+                                                setShowYearDrawer(false);
+                                            }}
+                                        >
+                                            {y}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <button onClick={() => setCurrentDate(new Date(year + 1, month, 1))} className="nav-arrow">
+                        ›
+                    </button>
+                </div>
+            );
+        } else {
+            return (
+                <div className="calendar-header-simple">
+                    {viewMode === 'month' && (
+                        <button onClick={handleBackToYear} className="nav-btn">← Year</button>
+                    )}
+                    <h2 className="calendar-title">{monthNames[month]} {year}</h2>
+                    {/* Spacer or directional buttons for month */}
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="nav-arrow small">‹</button>
+                        <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="nav-arrow small">›</button>
+                    </div>
+                </div>
+            );
+        }
+    };
+
+    const renderYearView = () => {
+        return (
+            <div className="main-content-wrapper year-view-full">
+                <div className="calendar-header-wrapper">
+                    {renderHeaderTitle()}
+                </div>
+                <div className="year-grid">
+                    {monthNames.map((monthName, idx) => {
+                        const monthDays = getDaysInMonth(idx, year);
+                        const firstDayIdx = getFirstDayOfMonth(idx, year);
+                        const miniCells = [];
+                        for (let i = 0; i < firstDayIdx; i++) miniCells.push(<div key={`empty-${i}`} className="mini-day empty"></div>);
+                        for (let d = 1; d <= monthDays; d++) {
+                            const dateKey = `${year}-${idx}-${d}`;
+                            const dayEventCount = events[dateKey] ? events[dateKey].length : 0;
+                            miniCells.push(
+                                <div key={d} className={`mini-day ${dayEventCount > 0 ? 'has-event' : ''}`}></div>
+                            );
+                        }
+                        return (
+                            <div key={idx} onClick={() => handleMonthClick(idx)} className={`month-card ${month === idx ? 'active' : ''}`}>
+                                <h3 className="month-name">{monthName}</h3>
+                                <div className="month-preview-grid">{miniCells}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
+
+    // Month view render remains similar but header is extracted
+    const renderMonthView = () => {
+        const daysInMonth = getDaysInMonth(month, year);
+        const firstDay = getFirstDayOfMonth(month, year);
+        const cells = [];
+        for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`} className="day-cell empty"></div>);
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = `${year}-${month}-${day}`;
+            const dayEvents = events[dateKey] || [];
+            const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
+            cells.push(
+                <div key={day} onClick={() => handleDateClick(day)} className={`day-cell ${isToday ? 'today' : ''}`}>
+                    <div className="day-number">{day}</div>
+                    <div className="event-dots">
+                        {dayEvents.slice(0, 3).map((_, i) => <div key={i} className="dot"></div>)}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="main-content-wrapper">
+                <div className="calendar-header-wrapper">
+                    {renderHeaderTitle()}
+                </div>
+                <div className="week-days-header">
+                    {dayNames.map(d => <div key={d} className="week-day-label">{d.substring(0, 3)}</div>)}
+                </div>
+                <div className="days-grid">{cells}</div>
+            </div>
+        );
+    };
+
+    // State to pass initial times to modal
+    const [modalInitialTimes, setModalInitialTimes] = useState({ start: '', end: '', description: '' });
+    const [editingEventIndex, setEditingEventIndex] = useState(null); // Track index of event being edited
+
+    const saveEvent = (eventData) => {
         if (!selectedDate) return;
-        
+
         const dateKey = `${year}-${month}-${selectedDate}`;
         const newEvents = { ...events };
         if (!newEvents[dateKey]) {
             newEvents[dateKey] = [];
         }
-        newEvents[dateKey].push(eventText);
+
+        if (editingEventIndex !== null) {
+            // Update existing event
+            newEvents[dateKey][editingEventIndex] = eventData;
+        } else {
+            // Add new event
+            newEvents[dateKey].push(eventData);
+        }
+
         setEvents(newEvents);
-        
+
         const currentUser = localStorage.getItem('currentUser');
         if (currentUser) {
             localStorage.setItem(`events_${currentUser}`, JSON.stringify(newEvents));
         }
-        
+
         setShowModal(false);
+        setEditingEventIndex(null); // Reset edit state
     };
 
     const deleteEvent = (day, eventIndex) => {
@@ -88,92 +305,155 @@ export default function Calendar() {
                 delete newEvents[dateKey];
             }
             setEvents(newEvents);
-            
+
             const currentUser = localStorage.getItem('currentUser');
             if (currentUser) {
                 localStorage.setItem(`events_${currentUser}`, JSON.stringify(newEvents));
             }
         }
+        setShowModal(false); // Close modal if open
     };
 
-    const renderYearView = () => {
+    const getTopOffset = (timeStr) => {
+        if (!timeStr) return 0;
+        const [h, m] = timeStr.split(':').map(Number);
+        return (h * 60) + m;
+    };
+
+    // Calculate layout for overlapping events
+    const calculateEventLayout = (dayEvents) => {
+        // 1. Convert to measurable objects with indices
+        let items = dayEvents.map((ev, idx) => {
+            let startStr = typeof ev === 'string' ? '09:00' : ev.startTime;
+            let endStr = typeof ev === 'string' ? '10:00' : ev.endTime;
+            return {
+                event: ev,
+                index: idx, // Original index in the dayEvents array
+                start: getTopOffset(startStr),
+                end: getTopOffset(endStr) || (getTopOffset(startStr) + 60), // Ensure end is after start, default 1hr
+                col: 0,
+                maxCols: 1
+            };
+        });
+
+        // 2. Sort by start time
+        items.sort((a, b) => a.start - b.start);
+
+        // 3. Assign columns (Greedy packing)
+        const columns = []; // Each element is an array of events in that column
+        items.forEach(item => {
+            let placed = false;
+            for (let i = 0; i < columns.length; i++) {
+                const col = columns[i];
+                const lastInCol = col[col.length - 1];
+                // Check if the current item can be placed in this column without overlapping the last event
+                if (lastInCol.end <= item.start) {
+                    col.push(item);
+                    item.col = i;
+                    placed = true;
+                    break;
+                }
+            }
+            if (!placed) {
+                // If no existing column can take the event, create a new column
+                columns.push([item]);
+                item.col = columns.length - 1;
+            }
+        });
+
+        // 4. Determine max columns for layout width
+        const totalColumns = columns.length;
+
+        return items.map(item => ({
+            ...item,
+            width: 100 / totalColumns, // Each column takes an equal percentage of the available width
+            left: (item.col / totalColumns) * 100 // Position based on its column index
+        }));
+    };
+
+    // Day View Render (Timeline Style)
+    const renderDayView = () => {
+        if (!selectedDate) return null;
+        const dateObj = new Date(year, month, selectedDate);
+        const dateKey = `${year}-${month}-${selectedDate}`;
+        const daysEvents = events[dateKey] || [];
+
+        const layoutItems = calculateEventLayout(daysEvents);
+
+        const handleTimelineClick = (hour) => {
+            const startStr = `${hour.toString().padStart(2, '0')}:00`;
+            const endHour = hour + 1;
+            const endStr = `${endHour.toString().padStart(2, '0')}:00`;
+            setModalInitialTimes({ start: startStr, end: endStr, description: '' });
+            setEditingEventIndex(null); // New event
+            setShowModal(true);
+        };
+
+        const handleEventClick = (e, ev, idx) => {
+            e.stopPropagation();
+            setEditingEventIndex(idx);
+
+            // Populate modal with existing event data
+            let isLegacy = typeof ev === 'string';
+            setModalInitialTimes({
+                start: isLegacy ? '09:00' : ev.startTime,
+                end: isLegacy ? '10:00' : ev.endTime,
+                description: isLegacy ? ev : ev.text
+            });
+            setShowModal(true);
+        };
+
         return (
-            <div style={{ padding: '20px', height: '100%', overflow: 'auto' }}>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '30px'
-                }}>
-                    <button
-                        onClick={() => setCurrentDate(new Date(year - 1, 0, 1))}
-                        style={{
-                            padding: '12px 24px',
-                            fontSize: '16px',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        ← {year - 1}
-                    </button>
-                    <h1 style={{ margin: 0, fontSize: '36px', color: '#333' }}>{year}</h1>
-                    <button
-                        onClick={() => setCurrentDate(new Date(year + 1, 0, 1))}
-                        style={{
-                            padding: '12px 24px',
-                            fontSize: '16px',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        {year + 1} →
-                    </button>
+            <div className="main-content-wrapper day-mode-content" style={{ height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column' }}>
+                <div className="calendar-header">
+                    <h2 className="calendar-title">{dayNames[dateObj.getDay()]}, {monthNames[month]} {selectedDate}</h2>
+                    {/* Add Event button removed - click on timeline instead */}
                 </div>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '20px'
-                }}>
-                    {monthNames.map((monthName, idx) => {
-                        const monthDays = getDaysInMonth(idx, year);
-                        let monthEventCount = 0;
-                        for (let day = 1; day <= monthDays; day++) {
-                            const dateKey = `${year}-${idx}-${day}`;
-                            if (events[dateKey]) {
-                                monthEventCount += events[dateKey].length;
-                            }
-                        }
-                        
+
+                <div className="timeline-view">
+                    {/* Render grid lines for 24 hours */}
+                    {Array.from({ length: 24 }).map((_, hour) => (
+                        <div
+                            key={hour}
+                            className="timeline-row"
+                            onClick={() => handleTimelineClick(hour)}
+                            style={{ cursor: 'pointer' }}
+                            title={`Click to add event at ${hour}:00`}
+                        >
+                            <div className="time-label">
+                                {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
+                            </div>
+                            <div className="timeline-content"></div>
+                        </div>
+                    ))}
+
+                    {/* Render Events with Layout */}
+                    {layoutItems.map((item) => {
+                        let ev = item.event;
+                        let isLegacy = typeof ev === 'string';
+                        let title = isLegacy ? ev : ev.text;
+                        let start = isLegacy ? '09:00' : ev.startTime;
+                        let end = isLegacy ? '10:00' : ev.endTime;
+
+                        const height = item.end - item.start; // Duration in mins/pixels
+
                         return (
                             <div
-                                key={idx}
-                                onClick={() => handleMonthClick(idx)}
+                                key={item.index} // Use the original index for key
+                                className="timeline-event"
                                 style={{
-                                    padding: '30px',
-                                    border: '2px solid #ddd',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    backgroundColor: month === idx ? '#e3f2fd' : 'white',
-                                    transition: 'all 0.2s',
-                                    textAlign: 'center'
+                                    top: `${item.start}px`,
+                                    height: `${height}px`,
+                                    left: `calc(70px + ${item.left}%)`, // Offset 70px for time labels, then % of remaining width
+                                    width: `calc((100% - 80px) * ${item.width / 100})`, // Width proportional to remaining space (10px padding on right)
+                                    zIndex: 10 + item.col // Stack z-index slightly for overlapping events
                                 }}
-                                onMouseOver={(e) => {
-                                    if (month !== idx) e.currentTarget.style.backgroundColor = '#f5f5f5';
-                                }}
-                                onMouseOut={(e) => {
-                                    if (month !== idx) e.currentTarget.style.backgroundColor = 'white';
-                                }}
+                                onClick={(e) => handleEventClick(e, ev, item.index)}
                             >
-                                <h3 style={{ margin: '0 0 15px 0', color: '#007bff', fontSize: '20px' }}>{monthName}</h3>
-                                <div style={{ fontSize: '16px', color: '#666' }}>
-                                    {monthEventCount > 0 ? `${monthEventCount} event${monthEventCount > 1 ? 's' : ''}` : 'No events'}
+                                <div className="event-time">
+                                    {start} - {end}
                                 </div>
+                                <div className="event-title">{title}</div>
                             </div>
                         );
                     })}
@@ -182,411 +462,64 @@ export default function Calendar() {
         );
     };
 
-    const renderMonthView = () => {
-        const daysInMonth = getDaysInMonth(month, year);
-        const firstDay = getFirstDayOfMonth(month, year);
-        const cells = [];
-
-        // Empty cells
-        for (let i = 0; i < firstDay; i++) {
-            cells.push(
-                <div key={`empty-${i}`} style={{ 
-                    backgroundColor: '#f8f9fa',
-                    border: '1px solid #dee2e6'
-                }}></div>
-            );
-        }
-
-        // Day cells
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateKey = `${year}-${month}-${day}`;
-            const dayEvents = events[dateKey] || [];
-            const isToday = new Date().getDate() === day && 
-                           new Date().getMonth() === month && 
-                           new Date().getFullYear() === year;
-
-            cells.push(
-                <div
-                    key={day}
-                    onClick={() => handleDateClick(day)}
-                    style={{
-                        padding: '10px',
-                        border: '1px solid #dee2e6',
-                        backgroundColor: isToday ? '#fff3cd' : 'white',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'hidden',
-                        transition: 'background-color 0.2s'
-                    }}
-                    onMouseOver={(e) => {
-                        if (!isToday) e.currentTarget.style.backgroundColor = '#f8f9fa';
-                    }}
-                    onMouseOut={(e) => {
-                        if (!isToday) e.currentTarget.style.backgroundColor = 'white';
-                    }}
-                >
-                    <div style={{ 
-                        fontWeight: isToday ? 'bold' : 'normal',
-                        fontSize: '16px',
-                        marginBottom: '8px',
-                        color: isToday ? '#007bff' : '#333'
-                    }}>
-                        {day}
-                    </div>
-                    <div style={{ 
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4px',
-                        flex: 1,
-                        overflow: 'hidden'
-                    }}>
-                        {dayEvents.slice(0, 3).map((event, idx) => (
-                            <div key={idx} style={{ 
-                                padding: '4px 8px',
-                                backgroundColor: '#007bff',
-                                color: 'white',
-                                borderRadius: '3px',
-                                fontSize: '11px',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                            }}>
-                                {event}
-                            </div>
-                        ))}
-                        {dayEvents.length > 3 && (
-                            <div style={{ 
-                                fontSize: '11px',
-                                color: '#007bff',
-                                fontWeight: 'bold'
-                            }}>
-                                +{dayEvents.length - 3} more
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        }
-
-        return (
-            <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                height: '100%',
-                padding: '10px'
-            }}>
-                {/* Month Navigation */}
-                <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    marginBottom: '10px'
-                }}>
-                    <button 
-                        onClick={previousMonth}
-                        style={{
-                            padding: '12px 24px',
-                            fontSize: '16px',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        ← Previous
-                    </button>
-                    <h2 style={{ margin: 0, fontSize: '28px' }}>
-                        {monthNames[month]} {year}
-                    </h2>
-                    <button 
-                        onClick={nextMonth}
-                        style={{
-                            padding: '12px 24px',
-                            fontSize: '16px',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Next →
-                    </button>
-                </div>
-
-                {/* Day Headers */}
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(7, 1fr)',
-                    gap: '0',
-                    marginBottom: '0'
-                }}>
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                        <div key={day} style={{
-                            padding: '12px',
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            fontSize: '14px',
-                            border: '1px solid #0056b3'
-                        }}>
-                            {day}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Calendar Grid */}
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(7, 1fr)',
-                    gridTemplateRows: 'repeat(6, 1fr)',
-                    gap: '0',
-                    flex: 1,
-                    minHeight: 0,
-                    border: '1px solid #dee2e6'
-                }}>
-                    {cells}
-                </div>
-            </div>
-        );
-    };
-
-    const renderDayView = () => {
-        if (!selectedDate) {
-            setSelectedDate(new Date().getDate());
-            return null;
-        }
-
-        const dateKey = `${year}-${month}-${selectedDate}`;
-        const dayEvents = events[dateKey] || [];
-        const date = new Date(year, month, selectedDate);
-        const dayOfWeek = dayNames[date.getDay()];
-
-        return (
-            <div style={{ 
-                padding: '30px',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'auto'
-            }}>
-                <div style={{ marginBottom: '30px' }}>
-                    <h2 style={{ 
-                        fontSize: '32px', 
-                        margin: '0 0 10px 0',
-                        color: '#007bff'
-                    }}>
-                        {dayOfWeek}, {monthNames[month]} {selectedDate}
-                    </h2>
-                    <p style={{ 
-                        fontSize: '20px',
-                        color: '#666',
-                        margin: 0
-                    }}>
-                        {year}
-                    </p>
-                </div>
-
-                <div style={{
-                    borderTop: '2px solid #e0e0e0',
-                    paddingTop: '20px'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '20px'
-                    }}>
-                        <h3 style={{ margin: 0, fontSize: '24px' }}>Events</h3>
-                        <button
-                            onClick={() => setShowModal(true)}
-                            style={{
-                                padding: '12px 24px',
-                                fontSize: '16px',
-                                backgroundColor: '#28a745',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            + Add Event
-                        </button>
-                    </div>
-
-                    {dayEvents.length === 0 ? (
-                        <p style={{ fontSize: '16px', color: '#999', fontStyle: 'italic' }}>
-                            No events scheduled for this day.
-                        </p>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            {dayEvents.map((event, idx) => (
-                                <div
-                                    key={idx}
-                                    style={{
-                                        padding: '16px 20px',
-                                        backgroundColor: '#f8f9fa',
-                                        borderLeft: '4px solid #007bff',
-                                        borderRadius: '4px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
-                                    }}
-                                >
-                                    <span style={{ fontSize: '16px', flex: 1 }}>{event}</span>
-                                    <button
-                                        onClick={() => deleteEvent(selectedDate, idx)}
-                                        style={{
-                                            padding: '8px 16px',
-                                            backgroundColor: '#dc3545',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontSize: '14px'
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    };
-
     if (!isLoggedIn) {
         return (
-            <div style={{ minHeight: '100vh', backgroundColor: 'white', paddingTop: '60px' }}>
+            <div className="calendar-container">
                 <Navbar />
                 <div style={{
+                    flex: 1,
                     display: 'flex',
-                    flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    minHeight: 'calc(100vh - 60px)',
-                    padding: '20px'
+                    marginTop: '64px'
                 }}>
-                    <h2 style={{ fontSize: '32px', marginBottom: '20px', color: '#333' }}>
-                        Login Required
-                    </h2>
-                    <p style={{ fontSize: '18px', marginBottom: '30px', color: '#666' }}>
-                        Please log in to access the calendar and manage your events.
-                    </p>
-                    <Link 
-                        to="/login"
-                        style={{
+                    <div className="glass-card" style={{
+                        padding: '40px',
+                        textAlign: 'center',
+                        maxWidth: '400px'
+                    }}>
+                        <h2 style={{ marginBottom: '20px', color: 'var(--text-main)' }}>Access Restricted</h2>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '30px' }}>
+                            Log in to use the calendar
+                        </p>
+                        <Link to="/login" className="btn-primary" style={{
                             padding: '12px 30px',
-                            fontSize: '18px',
-                            backgroundColor: '#007bff',
                             color: 'white',
                             textDecoration: 'none',
-                            borderRadius: '4px'
-                        }}
-                    >
-                        Go to Login
-                    </Link>
+                            display: 'inline-block'
+                        }}>
+                            Go to Login
+                        </Link>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div style={{ 
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100vh',
-            backgroundColor: 'white'
-        }}>
+        <div className="calendar-container">
             <Navbar />
-            
-            <div style={{ 
-                marginTop: '60px',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
-            }}>
-                {/* View Mode Navigation */}
-                <div style={{
-                    display: 'flex',
-                    gap: '0',
-                    borderBottom: '2px solid #dee2e6',
-                    backgroundColor: '#f8f9fa'
-                }}>
-                    <button
-                        onClick={() => setViewMode('year')}
-                        style={{
-                            padding: '16px 40px',
-                            fontSize: '16px',
-                            backgroundColor: viewMode === 'year' ? '#007bff' : 'transparent',
-                            color: viewMode === 'year' ? 'white' : '#666',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontWeight: viewMode === 'year' ? 'bold' : 'normal',
-                            transition: 'all 0.2s',
-                            borderRight: '1px solid #dee2e6'
-                        }}
-                    >
-                        Year Plan
-                    </button>
-                    <button
-                        onClick={() => setViewMode('month')}
-                        style={{
-                            padding: '16px 40px',
-                            fontSize: '16px',
-                            backgroundColor: viewMode === 'month' ? '#007bff' : 'transparent',
-                            color: viewMode === 'month' ? 'white' : '#666',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontWeight: viewMode === 'month' ? 'bold' : 'normal',
-                            transition: 'all 0.2s',
-                            borderRight: '1px solid #dee2e6'
-                        }}
-                    >
-                        Month Plan
-                    </button>
-                    <button
-                        onClick={() => {
-                            if (!selectedDate) {
-                                setSelectedDate(new Date().getDate());
-                            }
-                            setViewMode('day');
-                        }}
-                        style={{
-                            padding: '16px 40px',
-                            fontSize: '16px',
-                            backgroundColor: viewMode === 'day' ? '#007bff' : 'transparent',
-                            color: viewMode === 'day' ? 'white' : '#666',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontWeight: viewMode === 'day' ? 'bold' : 'normal',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        Day Plan
-                    </button>
-                </div>
-
-                {/* Content Area */}
-                <div style={{ flex: 1, overflow: 'hidden' }}>
-                    {viewMode === 'year' && renderYearView()}
-                    {viewMode === 'month' && renderMonthView()}
-                    {viewMode === 'day' && renderDayView()}
+            <div className="calendar-content-wrapper">
+                <div className={`calendar-layout ${viewMode}`}>
+                    <div className={`calendar-sidebar ${viewMode === 'year' ? 'hidden' : ''}`}>
+                        {renderSidebar()}
+                    </div>
+                    <div className="calendar-main">
+                        {viewMode === 'year' && renderYearView()}
+                        {viewMode === 'month' && renderMonthView()}
+                        {viewMode === 'day' && renderDayView()}
+                    </div>
                 </div>
             </div>
-
-            <EventModal 
+            <EventModal
                 show={showModal}
                 onHide={() => setShowModal(false)}
                 onSave={saveEvent}
                 selectedDate={selectedDate ? `${monthNames[month]} ${selectedDate}, ${year}` : ''}
+                initialStartTime={modalInitialTimes.start}
+                initialEndTime={modalInitialTimes.end}
+                initialDescription={modalInitialTimes.description}
+                onDelete={editingEventIndex !== null ? () => deleteEvent(selectedDate, editingEventIndex) : null}
             />
         </div>
     );

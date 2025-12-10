@@ -9,6 +9,7 @@ export default function Navbar() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [hideTimeout, setHideTimeout] = useState(null);
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,8 +18,37 @@ export default function Navbar() {
         if (currentUser) {
             setIsLoggedIn(true);
             setUsername(currentUser);
+
+            // Load user settings if any, otherwise default
+            const savedSettings = localStorage.getItem(`settings_${currentUser}`);
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                if (settings.mode === 'night') {
+                    setIsDarkMode(true);
+                    document.body.classList.add('night-mode');
+                }
+            }
         }
     }, []);
+
+    const toggleTheme = () => {
+        const newMode = !isDarkMode;
+        setIsDarkMode(newMode);
+
+        if (newMode) {
+            document.body.classList.add('night-mode');
+        } else {
+            document.body.classList.remove('night-mode');
+        }
+
+        // Save preference if logged in
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            const savedSettings = JSON.parse(localStorage.getItem(`settings_${currentUser}`) || '{}');
+            savedSettings.mode = newMode ? 'night' : 'day';
+            localStorage.setItem(`settings_${currentUser}`, JSON.stringify(savedSettings));
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('currentUser');
@@ -44,28 +74,71 @@ export default function Navbar() {
     };
 
     return (
-        <BSNavbar bg="primary" variant="dark" fixed="top" expand="lg" style={{ zIndex: 1000 }}>
-            <Container fluid>
-                <BSNavbar.Brand as={Link} to="/" style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                    Plan your day
-                </BSNavbar.Brand>
-                
-                <BSNavbar.Toggle aria-controls="basic-navbar-nav" />
-                
-                <BSNavbar.Collapse id="basic-navbar-nav">
-                    <Nav className="me-auto">
-                        <Nav.Link as={NavLink} to="/" style={{ color: 'white' }}>
-                            Home
-                        </Nav.Link>
-                        <Nav.Link as={NavLink} to="/calendar" style={{ color: 'white' }}>
-                            Calendar
-                        </Nav.Link>
-                    </Nav>
-                    
-                    <Nav>
+        <>
+            <style>{`
+                .glass-navbar {
+                    background: var(--glass-bg) !important;
+                    backdrop-filter: blur(12px) !important;
+                    -webkit-backdrop-filter: blur(12px) !important;
+                    border-bottom: 1px solid var(--glass-border) !important;
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.05) !important;
+                    transition: all 0.3s ease;
+                }
+                .nav-link-custom {
+                    color: var(--text-secondary) !important;
+                    font-weight: 500;
+                    padding: 8px 16px !important;
+                    border-radius: 24px; 
+                    transition: all 0.2s;
+                }
+                .nav-link-custom:hover, .nav-link-custom.active {
+                    color: var(--primary-color) !important;
+                    background: var(--primary-light);
+                }
+                .brand-text {
+                    background: linear-gradient(135deg, var(--primary-color), #60a5fa);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    font-weight: 800 !important;
+                }
+                .dropdown-glass {
+                    background: var(--glass-bg);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid var(--glass-border);
+                    box-shadow: var(--glass-shadow);
+                }
+                .theme-toggle-btn {
+                    background: transparent;
+                    border: none;
+                    font-size: 20px;
+                    cursor: pointer;
+                    padding: 8px;
+                    border-radius: 50%;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--text-secondary);
+                }
+                .theme-toggle-btn:hover {
+                    background: var(--primary-light);
+                    transform: rotate(15deg);
+                }
+            `}</style>
+            <BSNavbar className="glass-navbar" fixed="top" expand="lg" style={{ zIndex: 1000, height: '64px' }}>
+                <Container fluid>
+                    <BSNavbar.Brand as={Link} to="/" className="brand-text" style={{ fontSize: '24px' }}>
+                        Plan your day
+                    </BSNavbar.Brand>
+
+                    <div className="d-flex align-items-center gap-2 order-lg-last">
+                        <button onClick={toggleTheme} className="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                            {isDarkMode ? '☀️' : '🌙'}
+                        </button>
+
                         {isLoggedIn ? (
-                            <div 
-                                style={{ 
+                            <div
+                                style={{
                                     position: 'relative',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -79,42 +152,41 @@ export default function Navbar() {
                                     width: '40px',
                                     height: '40px',
                                     borderRadius: '50%',
-                                    backgroundColor: '#fff',
+                                    background: 'linear-gradient(135deg, var(--primary-color), #60a5fa)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     fontWeight: 'bold',
                                     fontSize: '18px',
-                                    color: '#007bff',
+                                    color: 'white',
                                     cursor: 'pointer',
-                                    border: '2px solid #fff',
-                                    pointerEvents: 'auto'
+                                    border: '2px solid rgba(255,255,255,0.5)',
+                                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
                                 }}>
                                     {username.charAt(0).toUpperCase()}
                                 </div>
-                                
+
                                 {/* Dropdown Menu */}
                                 {showDropdown && (
-                                    <div style={{
+                                    <div className="dropdown-glass" style={{
                                         position: 'absolute',
-                                        top: '50px',
-                                        right: '0',
-                                        backgroundColor: 'white',
-                                        borderRadius: '4px',
-                                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                        minWidth: '200px',
+                                        top: '55px',
+                                        right: '10px',
+                                        borderRadius: '12px',
+                                        minWidth: '220px',
                                         zIndex: 1001,
-                                        pointerEvents: 'auto'
+                                        pointerEvents: 'auto',
+                                        overflow: 'hidden'
                                     }}>
                                         <div style={{
-                                            padding: '15px',
-                                            borderBottom: '1px solid #e0e0e0',
-                                            color: '#333'
+                                            padding: '16px',
+                                            borderBottom: '1px solid var(--glass-border)',
+                                            color: 'var(--text-main)'
                                         }}>
-                                            <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                                            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
                                                 {username}
                                             </div>
-                                            <div style={{ fontSize: '12px', color: '#666' }}>
+                                            <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                                                 Logged in
                                             </div>
                                         </div>
@@ -124,35 +196,35 @@ export default function Navbar() {
                                                 setShowSettings(true);
                                             }}
                                             style={{
-                                                padding: '12px 15px',
+                                                padding: '12px 16px',
                                                 cursor: 'pointer',
-                                                color: '#333',
-                                                transition: 'background-color 0.2s',
+                                                color: 'var(--text-main)',
+                                                transition: 'all 0.2s',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '10px',
-                                                borderBottom: '1px solid #e0e0e0'
+                                                gap: '12px',
+                                                borderBottom: '1px solid var(--glass-border)'
                                             }}
-                                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
-                                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                                            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--primary-light)'; e.currentTarget.style.color = 'var(--primary-color)'; }}
+                                            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-main)'; }}
                                         >
                                             <span>⚙️</span>
-                                            <span>Settings</span>
+                                            <span>Personal Info</span>
                                         </div>
                                         <div
                                             onClick={handleLogout}
                                             style={{
-                                                padding: '12px 15px',
+                                                padding: '12px 16px',
                                                 cursor: 'pointer',
-                                                color: '#dc3545',
-                                                fontWeight: 'bold',
-                                                transition: 'background-color 0.2s',
+                                                color: 'var(--danger-color)',
+                                                fontWeight: '600',
+                                                transition: 'all 0.2s',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '10px'
+                                                gap: '12px'
                                             }}
-                                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
-                                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                         >
                                             <span>🚪</span>
                                             <span>Logout</span>
@@ -161,29 +233,43 @@ export default function Navbar() {
                                 )}
                             </div>
                         ) : (
-                            <Nav.Link 
-                                as={Link} 
-                                to="/login" 
+                            <Nav.Link
+                                as={Link}
+                                to="/login"
+                                className="btn-primary"
                                 style={{
-                                    backgroundColor: 'white',
-                                    color: '#007bff',
-                                    padding: '8px 20px',
-                                    borderRadius: '4px',
-                                    fontWeight: 'bold',
-                                    margin: '0 10px'
+                                    color: 'white',
+                                    padding: '8px 24px',
+                                    borderRadius: '10px',
+                                    fontWeight: '600',
+                                    margin: '0 10px',
+                                    boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)'
                                 }}
                             >
                                 Login / Sign Up
                             </Nav.Link>
                         )}
-                    </Nav>
-                </BSNavbar.Collapse>
-            </Container>
-            
-            <SettingsModal 
-                show={showSettings}
-                onHide={() => setShowSettings(false)}
-            />
-        </BSNavbar>
+                    </div>
+
+                    <BSNavbar.Toggle aria-controls="basic-navbar-nav" />
+
+                    <BSNavbar.Collapse id="basic-navbar-nav">
+                        <Nav className="me-auto" style={{ gap: '10px' }}>
+                            <Nav.Link as={NavLink} to="/" className="nav-link-custom">
+                                Home
+                            </Nav.Link>
+                            <Nav.Link as={NavLink} to="/calendar" className="nav-link-custom">
+                                Calendar
+                            </Nav.Link>
+                        </Nav>
+                    </BSNavbar.Collapse>
+                </Container>
+
+                <SettingsModal
+                    show={showSettings}
+                    onHide={() => setShowSettings(false)}
+                />
+            </BSNavbar>
+        </>
     );
 }

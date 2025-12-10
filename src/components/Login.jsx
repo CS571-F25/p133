@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
 import Navbar from './Navbar';
 
 export default function Login() {
@@ -8,61 +7,59 @@ export default function Login() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isSignup, setIsSignup] = useState(false);
-    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
-        
+
         // Basic validation
         if (!username || !password) {
             setError('Please enter both username and password');
             return;
         }
-        
+
         if (isSignup) {
             // Signup validation
             if (password !== confirmPassword) {
                 setError('Passwords do not match');
                 return;
             }
-            
+
             if (!/^\d{7}$/.test(password)) {
                 setError('Password must be exactly 7 digits');
                 return;
             }
-            
+
             // Check if user already exists
             const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
             if (existingUsers[username]) {
-                alert('Wrong username/password, try again.');
+                alert('Username already exists.');
                 return;
             }
-            
+
             // Save new user
             existingUsers[username] = { password };
             localStorage.setItem('users', JSON.stringify(existingUsers));
-            
+
             // Save logged in user
             localStorage.setItem('currentUser', username);
-            
+
             alert('Account created successfully!');
-            // Force a page reload to update the navbar
+            // Force a page reload/redirect
             window.location.href = '#/';
         } else {
             // Login validation
             const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
-            
+
             if (!existingUsers[username] || existingUsers[username].password !== password) {
                 alert('Wrong username/password, try again.');
                 return;
             }
-            
+
             // Save logged in user
             localStorage.setItem('currentUser', username);
-            
+
             alert('Login successful!');
-            // Force a page reload to update the navbar
             window.location.href = '#/';
         }
     };
@@ -82,155 +79,145 @@ export default function Login() {
 
     const handleConfirmPasswordChange = (e) => {
         const value = e.target.value;
-        // Only allow digits and limit to 7 characters
         if (/^\d*$/.test(value) && value.length <= 7) {
             setConfirmPassword(value);
         }
     };
 
     return (
-        <div style={{ 
+        <div style={{
             minHeight: '100vh',
-            backgroundColor: 'white',
-            paddingTop: '60px' // Add padding for fixed navbar
+            display: 'flex',
+            flexDirection: 'column'
         }}>
             <Navbar />
-            
+
             <div style={{
+                flex: 1,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: '40px 20px',
-                minHeight: 'calc(100vh - 60px)'
+                padding: '20px',
+                marginTop: '64px'
             }}>
-                <div style={{
+                <div className="glass-card" style={{
                     width: '100%',
-                    maxWidth: '400px',
+                    maxWidth: '450px',
                     padding: '40px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
                 }}>
-                    <h1 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>
-                        {isSignup ? 'Sign Up' : 'Login'}
+                    <h1 style={{
+                        marginBottom: '30px',
+                        color: 'var(--text-main)',
+                        fontWeight: '800'
+                    }}>
+                        {isSignup ? 'Create Account' : 'Welcome Back'}
                     </h1>
-                    
-                    <form onSubmit={handleSubmit}>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                                Username:
-                            </label>
+
+                    <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                        <div className="mb-3">
+                            <label className="form-label" style={{ fontWeight: '600' }}>Username</label>
                             <input
                                 type="text"
+                                className="form-control"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    fontSize: '16px',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    boxSizing: 'border-box'
-                                }}
                                 placeholder="Enter your username"
+                                style={{
+                                    padding: '12px',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--glass-border)',
+                                    background: 'rgba(255,255,255,0.5)'
+                                }}
                             />
                         </div>
-                        
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                                Password{isSignup ? ' (7 digits)' : ''}:
+
+                        <div className="mb-3">
+                            <label className="form-label" style={{ fontWeight: '600' }}>
+                                Password {isSignup && <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>(7 digits)</span>}
                             </label>
                             <input
                                 type={isSignup ? "text" : "password"}
+                                className="form-control"
                                 value={password}
                                 onChange={handlePasswordChange}
+                                placeholder={isSignup ? "7-digit password" : "Enter password"}
+                                maxLength={isSignup ? "7" : undefined}
                                 style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    fontSize: '16px',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    boxSizing: 'border-box',
+                                    padding: '12px',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--glass-border)',
+                                    background: 'rgba(255,255,255,0.5)',
                                     letterSpacing: isSignup ? '2px' : 'normal'
                                 }}
-                                placeholder={isSignup ? "Enter 7-digit password" : "Enter your password"}
-                                maxLength={isSignup ? "7" : undefined}
                             />
                             {isSignup && (
-                                <div style={{ 
-                                    fontSize: '12px',
-                                    color: '#666',
-                                    marginTop: '5px'
-                                }}>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '5px' }}>
                                     {password.length}/7 digits entered
                                 </div>
                             )}
                         </div>
-                        
+
                         {isSignup && (
-                            <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                                    Confirm Password:
-                                </label>
+                            <div className="mb-3">
+                                <label className="form-label" style={{ fontWeight: '600' }}>Confirm Password</label>
                                 <input
                                     type="text"
+                                    className="form-control"
                                     value={confirmPassword}
                                     onChange={handleConfirmPasswordChange}
+                                    placeholder="Re-enter password"
+                                    maxLength="7"
                                     style={{
-                                        width: '100%',
-                                        padding: '10px',
-                                        fontSize: '16px',
-                                        border: `1px solid ${confirmPassword && password !== confirmPassword ? '#dc3545' : '#ddd'}`,
-                                        borderRadius: '4px',
-                                        boxSizing: 'border-box',
+                                        padding: '12px',
+                                        borderRadius: '12px',
+                                        border: '1px solid var(--glass-border)',
+                                        background: 'rgba(255,255,255,0.5)',
                                         letterSpacing: '2px'
                                     }}
-                                    placeholder="Re-enter your password"
-                                    maxLength="7"
                                 />
                                 {confirmPassword && password !== confirmPassword && (
-                                    <div style={{ 
-                                        color: '#dc3545', 
-                                        fontSize: '12px',
-                                        marginTop: '5px'
-                                    }}>
+                                    <div style={{ color: 'var(--danger-color)', fontSize: '12px', marginTop: '5px' }}>
                                         Passwords do not match
                                     </div>
                                 )}
                             </div>
                         )}
-                        
+
                         {error && (
-                            <div style={{ 
-                                color: 'red', 
-                                marginBottom: '15px',
-                                fontSize: '14px',
+                            <div className="alert alert-danger" style={{
                                 padding: '10px',
-                                backgroundColor: '#ffebee',
-                                borderRadius: '4px'
+                                borderRadius: '12px',
+                                fontSize: '14px',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                color: 'var(--danger-color)'
                             }}>
                                 {error}
                             </div>
                         )}
-                        
-                        <button 
+
+                        <button
                             type="submit"
+                            className="btn-primary"
                             style={{
                                 width: '100%',
-                                padding: '12px',
+                                padding: '14px',
                                 fontSize: '16px',
-                                backgroundColor: '#007bff',
-                                color: 'white',
                                 border: 'none',
-                                borderRadius: '4px',
+                                borderRadius: '24px', // Pill
                                 cursor: 'pointer',
-                                fontWeight: 'bold',
-                                marginBottom: '15px'
+                                fontWeight: '700',
+                                marginTop: '10px',
+                                color: 'white' // Ensure white text
                             }}
                         >
-                            {isSignup ? 'Sign Up' : 'Login'}
+                            {isSignup ? 'Sign Up' : 'Log In'}
                         </button>
                     </form>
-                    
+
                     <div style={{ textAlign: 'center', marginTop: '20px' }}>
                         <button
                             onClick={() => {
@@ -242,13 +229,16 @@ export default function Login() {
                             style={{
                                 background: 'none',
                                 border: 'none',
-                                color: '#007bff',
+                                color: 'var(--primary-color)',
                                 cursor: 'pointer',
                                 fontSize: '14px',
-                                textDecoration: 'underline'
+                                fontWeight: '600',
+                                textDecoration: 'none'
                             }}
+                            onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                            onMouseOut={(e) => e.target.style.textDecoration = 'none'}
                         >
-                            {isSignup ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
+                            {isSignup ? 'Already have an account? Log In' : "Don't have an account? Sign Up"}
                         </button>
                     </div>
                 </div>
