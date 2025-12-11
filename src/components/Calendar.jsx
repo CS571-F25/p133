@@ -93,13 +93,22 @@ export default function Calendar() {
                     <h3 className="sidebar-year">{year}</h3>
                     <div className="sidebar-scroll">
                         {monthNames.map((mName, idx) => (
-                            <div
+                            <button
                                 key={idx}
                                 className={`sidebar-item ${month === idx ? 'active' : ''}`}
                                 onClick={() => handleMonthClick(idx)}
+                                aria-label={`Select ${mName}`}
+                                aria-current={month === idx ? 'true' : 'false'}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    cursor: 'pointer'
+                                }}
                             >
                                 {mName}
-                            </div>
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -162,28 +171,45 @@ export default function Calendar() {
                         </button>
 
                         <div className="year-drawer-container">
-                            <h3
+                            <button
                                 className="year-clickable"
                                 onClick={() => setShowYearDrawer(!showYearDrawer)}
-                                style={{ margin: '0 10px', fontSize: '1.5rem' }}
+                                style={{
+                                    margin: '0 10px',
+                                    fontSize: '1.5rem',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'inherit',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}
+                                aria-expanded={showYearDrawer}
+                                aria-label="Toggle year selection"
                             >
-                                {year} <span style={{ fontSize: '0.8rem' }}>▼</span>
-                            </h3>
+                                {year} <span style={{ fontSize: '0.8rem', marginLeft: '5px' }}>▼</span>
+                            </button>
 
                             {showYearDrawer && (
                                 <div className="year-drawer glass-card">
                                     <div className="year-grid-select">
                                         {Array.from({ length: 12 }, (_, i) => year - 4 + i).map(y => (
-                                            <div
+                                            <button
                                                 key={y}
                                                 className={`year-option ${y === year ? 'active' : ''}`}
                                                 onClick={() => {
                                                     setCurrentDate(new Date(y, month, 1));
                                                     setShowYearDrawer(false);
                                                 }}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer'
+                                                }}
                                             >
                                                 {y}
-                                            </div>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
@@ -333,7 +359,19 @@ export default function Calendar() {
             const daySticker = stickers[dateKey];
             const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
             cells.push(
-                <div key={day} onClick={() => handleDateClick(day)} className={`day-cell ${isToday ? 'today' : ''}`}>
+                <div
+                    key={day}
+                    onClick={() => handleDateClick(day)}
+                    className={`day-cell ${isToday ? 'today' : ''}`}
+                    tabIndex="0"
+                    role="button"
+                    aria-label={`View events for ${monthNames[month]} ${day}, ${year}`}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            handleDateClick(day);
+                        }
+                    }}
+                >
                     <div className="day-number">{day}</div>
                     {daySticker && <div className="day-sticker">{daySticker}</div>}
                     <div className="event-dots">

@@ -238,7 +238,24 @@ export default function CheckIn() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
                         {filteredRooms.map(room => (
-                            <div key={room.id} className="glass-card" style={{ padding: '24px', cursor: 'pointer', transition: 'transform 0.2s' }}>
+                            <div
+                                key={room.id}
+                                className="glass-card"
+                                style={{ padding: '24px', cursor: 'pointer', transition: 'transform 0.2s' }}
+                                tabIndex="0"
+                                role="button"
+                                aria-label={`View details for room ${room.title}`}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        if (isUserInRoom(room)) {
+                                            setSelectedRoom(room);
+                                            setView('room');
+                                        } else {
+                                            handleJoinRoom(room.id);
+                                        }
+                                    }
+                                }}
+                            >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                     <Badge bg="info">{room.tag}</Badge>
                                     <span style={{ color: 'var(--text-secondary)' }}>👥 {room.members.length}</span>
@@ -287,7 +304,7 @@ export default function CheckIn() {
                     </Modal.Header>
                     <Modal.Body>
                         <Form>
-                            <Form.Group className="mb-3">
+                            <Form.Group className="mb-3" controlId="roomTitle">
                                 <Form.Label>Room Title</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -296,7 +313,7 @@ export default function CheckIn() {
                                     onChange={(e) => setNewRoomTitle(e.target.value)}
                                 />
                             </Form.Group>
-                            <Form.Group className="mb-3">
+                            <Form.Group className="mb-3" controlId="roomDesc">
                                 <Form.Label>Description</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -305,7 +322,7 @@ export default function CheckIn() {
                                     onChange={(e) => setNewRoomDesc(e.target.value)}
                                 />
                             </Form.Group>
-                            <Form.Group className="mb-3">
+                            <Form.Group className="mb-3" controlId="roomTag">
                                 <Form.Label>Category</Form.Label>
                                 <Form.Select
                                     value={newRoomTag}

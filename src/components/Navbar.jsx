@@ -138,11 +138,21 @@ export default function Navbar() {
 
                         {isLoggedIn ? (
                             <div
+                                tabIndex="0"
+                                role="button"
+                                aria-label="User menu"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        setShowDropdown(!showDropdown);
+                                    }
+                                }}
                                 style={{
                                     position: 'relative',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    padding: '0 15px'
+                                    padding: '0 15px',
+                                    border: 'none',
+                                    background: 'transparent'
                                 }}
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
@@ -190,12 +200,16 @@ export default function Navbar() {
                                                 Logged in
                                             </div>
                                         </div>
-                                        <div
+                                        <button
                                             onClick={() => {
                                                 setShowDropdown(false);
                                                 setShowSettings(true);
                                             }}
                                             style={{
+                                                width: '100%',
+                                                textAlign: 'left',
+                                                background: 'transparent',
+                                                border: 'none',
                                                 padding: '12px 16px',
                                                 cursor: 'pointer',
                                                 color: 'var(--text-main)',
@@ -203,17 +217,22 @@ export default function Navbar() {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '12px',
-                                                borderBottom: '1px solid var(--glass-border)'
+                                                borderBottom: '1px solid var(--glass-border)',
+                                                fontSize: '1rem'
                                             }}
                                             onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--primary-light)'; e.currentTarget.style.color = 'var(--primary-color)'; }}
                                             onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-main)'; }}
                                         >
                                             <span>⚙️</span>
                                             <span>Personal Info</span>
-                                        </div>
-                                        <div
+                                        </button>
+                                        <button
                                             onClick={handleLogout}
                                             style={{
+                                                width: '100%',
+                                                textAlign: 'left',
+                                                background: 'transparent',
+                                                border: 'none',
                                                 padding: '12px 16px',
                                                 cursor: 'pointer',
                                                 color: 'var(--danger-color)',
@@ -221,14 +240,15 @@ export default function Navbar() {
                                                 transition: 'all 0.2s',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '12px'
+                                                gap: '12px',
+                                                fontSize: '1rem'
                                             }}
                                             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
                                             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                         >
                                             <span>🚪</span>
                                             <span>Logout</span>
-                                        </div>
+                                        </button>
                                     </div>
                                 )}
                             </div>
