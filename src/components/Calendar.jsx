@@ -99,13 +99,6 @@ export default function Calendar() {
                                 onClick={() => handleMonthClick(idx)}
                                 aria-label={`Select ${mName}`}
                                 aria-current={month === idx ? 'true' : 'false'}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    width: '100%',
-                                    textAlign: 'left',
-                                    cursor: 'pointer'
-                                }}
                             >
                                 {mName}
                             </button>
@@ -201,11 +194,6 @@ export default function Calendar() {
                                                 onClick={() => {
                                                     setCurrentDate(new Date(y, month, 1));
                                                     setShowYearDrawer(false);
-                                                }}
-                                                style={{
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    cursor: 'pointer'
                                                 }}
                                             >
                                                 {y}

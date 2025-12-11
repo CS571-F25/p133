@@ -345,6 +345,8 @@ body.night-mode .year-drawer {
     /* Subtle background */
     text-align: center;
     /* Center text */
+    width: 100%;
+    display: block;
 }
 
 body.night-mode .sidebar-item {
