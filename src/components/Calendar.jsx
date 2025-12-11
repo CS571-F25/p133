@@ -1,6 +1,7 @@
 import Navbar from './Navbar';
 import EventModal from './EventModal';
 import { useState, useEffect } from 'react';
+import StickerPicker from './StickerPicker';
 import { Link } from 'react-router';
 import './Calendar.css';
 
@@ -19,7 +20,7 @@ export default function Calendar() {
     // Year Selection Drawer State
     const [showYearDrawer, setShowYearDrawer] = useState(false);
 
-    const [viewMode, setViewMode] = useState('year');
+    const [viewMode, setViewMode] = useState('month');
     const [direction, setDirection] = useState('forward');
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -86,10 +87,6 @@ export default function Calendar() {
 
 
     const renderSidebar = () => {
-        if (viewMode === 'year') {
-            return null;
-        }
-
         if (viewMode === 'month') {
             return (
                 <div className="sidebar-list">
@@ -153,92 +150,54 @@ export default function Calendar() {
     };
 
     const renderHeaderTitle = () => {
-        if (viewMode === 'year') {
+        if (viewMode === 'month') {
             return (
-                <div className="year-navigator">
-                    <button onClick={() => setCurrentDate(new Date(year - 1, month, 1))} className="nav-arrow">
-                        ‹
-                    </button>
+                <div className="calendar-header-simple" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <h2 className="calendar-title" style={{ margin: 0 }}>{monthNames[month]}</h2>
 
-                    <div className="year-drawer-container">
-                        <h1
-                            className="calendar-title year-clickable"
-                            onClick={() => setShowYearDrawer(!showYearDrawer)}
-                        >
-                            {year} <span style={{ fontSize: '1rem' }}>▼</span>
-                        </h1>
+                    {/* Integrated Year Navigator */}
+                    <div className="year-navigator" style={{ margin: 0, justifyContent: 'flex-end', width: 'auto' }}>
+                        <button onClick={() => setCurrentDate(new Date(year - 1, month, 1))} className="nav-arrow small">
+                            ‹
+                        </button>
 
-                        {showYearDrawer && (
-                            <div className="year-drawer glass-card">
-                                <div className="year-grid-select">
-                                    {Array.from({ length: 12 }, (_, i) => year - 4 + i).map(y => (
-                                        <div
-                                            key={y}
-                                            className={`year-option ${y === year ? 'active' : ''}`}
-                                            onClick={() => {
-                                                setCurrentDate(new Date(y, month, 1));
-                                                setShowYearDrawer(false);
-                                            }}
-                                        >
-                                            {y}
-                                        </div>
-                                    ))}
+                        <div className="year-drawer-container">
+                            <h3
+                                className="year-clickable"
+                                onClick={() => setShowYearDrawer(!showYearDrawer)}
+                                style={{ margin: '0 10px', fontSize: '1.5rem' }}
+                            >
+                                {year} <span style={{ fontSize: '0.8rem' }}>▼</span>
+                            </h3>
+
+                            {showYearDrawer && (
+                                <div className="year-drawer glass-card">
+                                    <div className="year-grid-select">
+                                        {Array.from({ length: 12 }, (_, i) => year - 4 + i).map(y => (
+                                            <div
+                                                key={y}
+                                                className={`year-option ${y === year ? 'active' : ''}`}
+                                                onClick={() => {
+                                                    setCurrentDate(new Date(y, month, 1));
+                                                    setShowYearDrawer(false);
+                                                }}
+                                            >
+                                                {y}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
 
-                    <button onClick={() => setCurrentDate(new Date(year + 1, month, 1))} className="nav-arrow">
-                        ›
-                    </button>
-                </div>
-            );
-        } else {
-            return (
-                <div className="calendar-header-simple">
-                    {viewMode === 'month' && (
-                        <button onClick={handleBackToYear} className="nav-btn">← Year</button>
-                    )}
-                    <h2 className="calendar-title">{monthNames[month]} {year}</h2>
-                    {/* Spacer or directional buttons for month */}
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="nav-arrow small">‹</button>
-                        <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="nav-arrow small">›</button>
+                        <button onClick={() => setCurrentDate(new Date(year + 1, month, 1))} className="nav-arrow small">
+                            ›
+                        </button>
                     </div>
                 </div>
             );
         }
-    };
-
-    const renderYearView = () => {
-        return (
-            <div className="main-content-wrapper year-view-full">
-                <div className="calendar-header-wrapper">
-                    {renderHeaderTitle()}
-                </div>
-                <div className="year-grid">
-                    {monthNames.map((monthName, idx) => {
-                        const monthDays = getDaysInMonth(idx, year);
-                        const firstDayIdx = getFirstDayOfMonth(idx, year);
-                        const miniCells = [];
-                        for (let i = 0; i < firstDayIdx; i++) miniCells.push(<div key={`empty-${i}`} className="mini-day empty"></div>);
-                        for (let d = 1; d <= monthDays; d++) {
-                            const dateKey = `${year}-${idx}-${d}`;
-                            const dayEventCount = events[dateKey] ? events[dateKey].length : 0;
-                            miniCells.push(
-                                <div key={d} className={`mini-day ${dayEventCount > 0 ? 'has-event' : ''}`}></div>
-                            );
-                        }
-                        return (
-                            <div key={idx} onClick={() => handleMonthClick(idx)} className={`month-card ${month === idx ? 'active' : ''}`}>
-                                <h3 className="month-name">{monthName}</h3>
-                                <div className="month-preview-grid">{miniCells}</div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        );
+        return null;
     };
 
 
@@ -444,33 +403,11 @@ export default function Calendar() {
                         </button>
 
                         {showStickerPicker && (
-                            <div className="sticker-picker-popover">
-                                <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>How was your day?</h4>
-                                <div className="sticker-grid">
-                                    {stickerOptions.map(emoji => (
-                                        <div
-                                            key={emoji}
-                                            className="sticker-option"
-                                            onClick={() => handleStickerSelect(emoji)}
-                                        >
-                                            {emoji}
-                                        </div>
-                                    ))}
-                                </div>
-                                <button
-                                    onClick={() => handleStickerSelect(null)}
-                                    style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        color: 'var(--text-secondary)',
-                                        fontSize: '0.9rem',
-                                        cursor: 'pointer',
-                                        marginTop: '5px'
-                                    }}
-                                >
-                                    Clear Mood
-                                </button>
-                            </div>
+                            <StickerPicker
+                                options={stickerOptions}
+                                onSelect={handleStickerSelect}
+                                onClose={() => setShowStickerPicker(false)}
+                            />
                         )}
                     </div>
                 </div>
@@ -570,7 +507,6 @@ export default function Calendar() {
                         {renderSidebar()}
                     </div>
                     <div className="calendar-main">
-                        {viewMode === 'year' && renderYearView()}
                         {viewMode === 'month' && renderMonthView()}
                         {viewMode === 'day' && renderDayView()}
                     </div>

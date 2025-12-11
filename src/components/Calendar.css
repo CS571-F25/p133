@@ -43,6 +43,15 @@
     transition: all 0.3s ease;
 }
 
+.sidebar-year {
+    /* padding-top removed */
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
 /* Timeline Day View (Outlook Style) */
 .timeline-view {
     display: flex;
@@ -187,6 +196,8 @@ body.night-mode .timeline-content::before {
     overflow-y: auto;
     flex: 1;
     padding-right: 5px;
+    padding-top: 20px;
+    /* Added padding here */
 }
 
 /* Year Navigation (Arrows + Drawer) */
@@ -228,6 +239,32 @@ body.night-mode .timeline-content::before {
     width: 32px;
     height: 32px;
     font-size: 1.5rem;
+}
+
+/* Back Buttons (Glass Pill Style) */
+.nav-btn,
+.btn-back-sidebar {
+    background: var(--bg-offset);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-btn:hover,
+.btn-back-sidebar:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateX(-2px);
+    /* Slight bump left */
 }
 
 .year-drawer-container {
@@ -348,9 +385,19 @@ body.night-mode .sidebar-item {
 /* Grids */
 .year-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
     padding-bottom: 20px;
+}
+
+.month-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    text-align: center;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .days-grid {
@@ -385,10 +432,14 @@ body.night-mode .sidebar-item {
 .day-cell {
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 10px;
+    border-radius: 20px;
+    padding: 20px;
+    /* Increased padding */
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
+    display: flex;
+    /* Ensure content stretches */
+    flex-direction: column;
 }
 
 body.night-mode .month-card,

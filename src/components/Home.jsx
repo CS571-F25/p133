@@ -1,6 +1,11 @@
 import Navbar from './Navbar';
 import { Carousel } from 'react-bootstrap';
 import { Link } from 'react-router';
+import FeatureCard from './FeatureCard';
+import MonthImg from '../assets/Month.png';
+import ChatImg from '../assets/Chat.png';
+import CheckInImg from '../assets/CheckIn.png';
+import GridImg from '../assets/Grid.png';
 
 export default function Home(props) {
     return (
@@ -81,20 +86,32 @@ export default function Home(props) {
                     <Carousel indicators interval={4000} controls={true} fade>
                         <Carousel.Item>
                             <div className="slide-frame">
-                                <div className="main-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <h3 style={{ fontSize: '2rem', color: 'var(--primary-color)' }}>Organize</h3>
+                                <div className="main-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px', overflow: 'hidden' }}>
+                                    <div style={{ flex: 1, zIndex: 2 }}>
+                                        <h3 style={{ fontSize: '2.5rem', color: 'var(--primary-color)', marginBottom: '10px' }}>Organize</h3>
+                                        <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)' }}>Plan your months with ease.</p>
+                                    </div>
+                                    <div style={{ flex: 1.5, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
+                                        <img src={MonthImg} alt="Month Preview" style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+                                    </div>
                                 </div>
-                                <div className="float-card small float-1" />
-                                <div className="float-card small float-2" />
+                                <div className="float-card small float-1" style={{ top: '10%', right: '5%' }} />
+                                <div className="float-card small float-2" style={{ bottom: '10%', left: '5%' }} />
                             </div>
                         </Carousel.Item>
                         <Carousel.Item>
                             <div className="slide-frame">
-                                <div className="main-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <h3 style={{ fontSize: '2rem', color: 'var(--primary-color)' }}>Analyze</h3>
+                                <div className="main-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px', overflow: 'hidden' }}>
+                                    <div style={{ flex: 1, zIndex: 2 }}>
+                                        <h3 style={{ fontSize: '2.5rem', color: 'var(--primary-color)', marginBottom: '10px' }}>Analyze</h3>
+                                        <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)' }}>Track habits & progress.</p>
+                                    </div>
+                                    <div style={{ flex: 1.5, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
+                                        <img src={GridImg} alt="Grid Preview" style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+                                    </div>
                                 </div>
-                                <div className="float-card tiny float-1" />
-                                <div className="float-card small float-2" />
+                                <div className="float-card tiny float-1" style={{ top: '15%', right: '10%' }} />
+                                <div className="float-card small float-2" style={{ bottom: '15%', left: '10%' }} />
                             </div>
                         </Carousel.Item>
                     </Carousel>
@@ -128,32 +145,73 @@ export default function Home(props) {
                         </p>
                     </div>
 
-                    <div className="feature-grid" style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '24px',
-                        marginBottom: '40px'
-                    }}>
-                        {[
-                            { icon: '📅', title: 'Easy Scheduling', text: 'Create and manage events with just a few clicks. Set reminders and stay on top of your schedule.' },
-                            { icon: '🔔', title: 'Smart Reminders', text: 'Get notified about upcoming events and never miss important appointments or deadlines.' },
-                            { icon: '📊', title: 'Month View', text: 'View your entire month at a glance and plan ahead with our comprehensive calendar view.' }
-                        ].map((feature, i) => (
-                            <div key={i} className="feature-card glass-card" style={{
-                                padding: '30px',
-                                background: 'rgba(255,255,255,0.4)',
-                                border: '1px solid var(--glass-border)'
-                            }}>
-                                <div style={{ fontSize: '2rem', marginBottom: '15px' }}>{feature.icon}</div>
-                                <h3 style={{ color: 'var(--primary-color)', marginBottom: '10px', fontSize: '1.25rem' }}>
-                                    {feature.title}
-                                </h3>
-                                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                                    {feature.text}
+                    <div className="feature-showcase" style={{ display: 'flex', flexDirection: 'column', gap: '80px', marginBottom: '80px' }}>
+
+                        {/* Feature 1: Month View (Image Left, Text Right) */}
+                        <div className="feature-row" style={{ display: 'flex', alignItems: 'center', gap: '40px', flexDirection: 'row' }}>
+                            <div className="feature-image" style={{ flex: 1 }}>
+                                <img src={MonthImg} alt="Month View" style={{ width: '100%', borderRadius: '16px', border: '1px solid var(--glass-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
+                            </div>
+                            <div className="feature-text" style={{ flex: 1 }}>
+                                <h3 style={{ fontSize: '2rem', color: 'var(--primary-color)', marginBottom: '15px' }}>Comprehensive Planning</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', lineHeight: '1.6' }}>
+                                    View your entire month at a glance. Manage events, set moods, and navigate years with ease involving our new Month View.
                                 </p>
                             </div>
-                        ))}
+                        </div>
+
+                        {/* Feature 2: Check-In (Text Left, Image Right) */}
+                        <div className="feature-row reversed" style={{ display: 'flex', alignItems: 'center', gap: '40px', flexDirection: 'row-reverse' }}>
+                            <div className="feature-image" style={{ flex: 1 }}>
+                                <img src={CheckInImg} alt="Check In Feature" style={{ width: '100%', borderRadius: '16px', border: '1px solid var(--glass-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
+                            </div>
+                            <div className="feature-text" style={{ flex: 1 }}>
+                                <h3 style={{ fontSize: '2rem', color: 'var(--primary-color)', marginBottom: '15px' }}>Daily Goal Check-Ins</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', lineHeight: '1.6' }}>
+                                    Join goal-based rooms and check in daily. Stay accountable and track your journey alongside friends and teammates.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Feature 3: Chat (Image Left, Text Right) */}
+                        <div className="feature-row" style={{ display: 'flex', alignItems: 'center', gap: '40px', flexDirection: 'row' }}>
+                            <div className="feature-image" style={{ flex: 1 }}>
+                                <img src={ChatImg} alt="Chat Feature" style={{ width: '100%', borderRadius: '16px', border: '1px solid var(--glass-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
+                            </div>
+                            <div className="feature-text" style={{ flex: 1 }}>
+                                <h3 style={{ fontSize: '2rem', color: 'var(--primary-color)', marginBottom: '15px' }}>Real-time Collaboration</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', lineHeight: '1.6' }}>
+                                    Stay connected with your team. Share updates, motivate each other, and discuss progress in dedicated room chats.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Feature 4: Grid (Text Left, Image Right) */}
+                        <div className="feature-row reversed" style={{ display: 'flex', alignItems: 'center', gap: '40px', flexDirection: 'row-reverse' }}>
+                            <div className="feature-image" style={{ flex: 1 }}>
+                                <img src={GridImg} alt="Consistency Grid" style={{ width: '100%', borderRadius: '16px', border: '1px solid var(--glass-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
+                            </div>
+                            <div className="feature-text" style={{ flex: 1 }}>
+                                <h3 style={{ fontSize: '2rem', color: 'var(--primary-color)', marginBottom: '15px' }}>Visualize Your Consistency</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', lineHeight: '1.6' }}>
+                                    Watch your progress grow on the commitment grid. Visual cues help you maintain your streak and build lasting habits.
+                                </p>
+                            </div>
+                        </div>
+
                     </div>
+
+                    <style>{`
+                        @media (max-width: 768px) {
+                            .feature-row, .feature-row.reversed {
+                                flexDirection: column !important;
+                                text-align: center;
+                            }
+                            .feature-image, .feature-text {
+                                width: 100%;
+                            }
+                        }
+                    `}</style>
 
                     <div style={{
                         textAlign: 'center',
