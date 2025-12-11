@@ -11,6 +11,11 @@ export default function Calendar() {
     const [events, setEvents] = useState({});
     const [showModal, setShowModal] = useState(false);
 
+    // Daily Stickers State
+    const [stickers, setStickers] = useState({});
+    const [showStickerPicker, setShowStickerPicker] = useState(false);
+    const stickerOptions = ['😊', '🤩', '🥳', '😎', '🤔', '😐', '😴', '😤', '😭', '🤯', '🔥', '🎉', '💻', '📚', '🏃', '☕', '🍷', '🍕', '🏆', '⭐'];
+
     // Year Selection Drawer State
     const [showYearDrawer, setShowYearDrawer] = useState(false);
 
@@ -29,6 +34,11 @@ export default function Calendar() {
             const savedEvents = localStorage.getItem(`events_${currentUser}`);
             if (savedEvents) {
                 setEvents(JSON.parse(savedEvents));
+            }
+
+            const savedStickers = localStorage.getItem(`stickers_${currentUser}`);
+            if (savedStickers) {
+                setStickers(JSON.parse(savedStickers));
             }
 
             const savedSettings = localStorage.getItem(`settings_${currentUser}`);
@@ -231,38 +241,6 @@ export default function Calendar() {
         );
     };
 
-    // Month view render remains similar but header is extracted
-    const renderMonthView = () => {
-        const daysInMonth = getDaysInMonth(month, year);
-        const firstDay = getFirstDayOfMonth(month, year);
-        const cells = [];
-        for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`} className="day-cell empty"></div>);
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateKey = `${year}-${month}-${day}`;
-            const dayEvents = events[dateKey] || [];
-            const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
-            cells.push(
-                <div key={day} onClick={() => handleDateClick(day)} className={`day-cell ${isToday ? 'today' : ''}`}>
-                    <div className="day-number">{day}</div>
-                    <div className="event-dots">
-                        {dayEvents.slice(0, 3).map((_, i) => <div key={i} className="dot"></div>)}
-                    </div>
-                </div>
-            );
-        }
-
-        return (
-            <div className="main-content-wrapper">
-                <div className="calendar-header-wrapper">
-                    {renderHeaderTitle()}
-                </div>
-                <div className="week-days-header">
-                    {dayNames.map(d => <div key={d} className="week-day-label">{d.substring(0, 3)}</div>)}
-                </div>
-                <div className="days-grid">{cells}</div>
-            </div>
-        );
-    };
 
     // State to pass initial times to modal
     const [modalInitialTimes, setModalInitialTimes] = useState({ start: '', end: '', description: '' });
@@ -312,6 +290,19 @@ export default function Calendar() {
             }
         }
         setShowModal(false); // Close modal if open
+    };
+
+    const handleStickerSelect = (emoji) => {
+        if (!selectedDate) return;
+        const dateKey = `${year}-${month}-${selectedDate}`;
+        const newStickers = { ...stickers, [dateKey]: emoji };
+        setStickers(newStickers);
+
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            localStorage.setItem(`stickers_${currentUser}`, JSON.stringify(newStickers));
+        }
+        setShowStickerPicker(false);
     };
 
     const getTopOffset = (timeStr) => {
@@ -371,12 +362,48 @@ export default function Calendar() {
         }));
     };
 
+    // Month view render remains similar but header is extracted
+    const renderMonthView = () => {
+        const daysInMonth = getDaysInMonth(month, year);
+        const firstDay = getFirstDayOfMonth(month, year);
+        const cells = [];
+        for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`} className="day-cell empty"></div>);
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = `${year}-${month}-${day}`;
+            const dayEvents = events[dateKey] || [];
+            const daySticker = stickers[dateKey];
+            const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
+            cells.push(
+                <div key={day} onClick={() => handleDateClick(day)} className={`day-cell ${isToday ? 'today' : ''}`}>
+                    <div className="day-number">{day}</div>
+                    {daySticker && <div className="day-sticker">{daySticker}</div>}
+                    <div className="event-dots">
+                        {dayEvents.slice(0, 3).map((_, i) => <div key={i} className="dot"></div>)}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="main-content-wrapper">
+                <div className="calendar-header-wrapper">
+                    {renderHeaderTitle()}
+                </div>
+                <div className="week-days-header">
+                    {dayNames.map(d => <div key={d} className="week-day-label">{d.substring(0, 3)}</div>)}
+                </div>
+                <div className="days-grid">{cells}</div>
+            </div>
+        );
+    };
+
     // Day View Render (Timeline Style)
     const renderDayView = () => {
         if (!selectedDate) return null;
         const dateObj = new Date(year, month, selectedDate);
         const dateKey = `${year}-${month}-${selectedDate}`;
         const daysEvents = events[dateKey] || [];
+        const currentSticker = stickers[dateKey];
 
         const layoutItems = calculateEventLayout(daysEvents);
 
@@ -405,9 +432,47 @@ export default function Calendar() {
 
         return (
             <div className="main-content-wrapper day-mode-content" style={{ height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column' }}>
-                <div className="calendar-header">
+                <div className="calendar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 className="calendar-title">{dayNames[dateObj.getDay()]}, {monthNames[month]} {selectedDate}</h2>
-                    {/* Add Event button removed - click on timeline instead */}
+
+                    <div style={{ position: 'relative' }}>
+                        <button
+                            className="sticker-btn"
+                            onClick={() => setShowStickerPicker(!showStickerPicker)}
+                        >
+                            {currentSticker ? <span>{currentSticker} Mood set</span> : <span>+ Set Mood</span>}
+                        </button>
+
+                        {showStickerPicker && (
+                            <div className="sticker-picker-popover">
+                                <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>How was your day?</h4>
+                                <div className="sticker-grid">
+                                    {stickerOptions.map(emoji => (
+                                        <div
+                                            key={emoji}
+                                            className="sticker-option"
+                                            onClick={() => handleStickerSelect(emoji)}
+                                        >
+                                            {emoji}
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={() => handleStickerSelect(null)}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: 'var(--text-secondary)',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer',
+                                        marginTop: '5px'
+                                    }}
+                                >
+                                    Clear Mood
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="timeline-view">
@@ -478,9 +543,9 @@ export default function Calendar() {
                         textAlign: 'center',
                         maxWidth: '400px'
                     }}>
-                        <h2 style={{ marginBottom: '20px', color: 'var(--text-main)' }}>Access Restricted</h2>
+                        <h2 style={{ marginBottom: '20px', color: 'var(--text-main)' }}>Log In Required</h2>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '30px' }}>
-                            Log in to use the calendar
+                            Log in to access your personal calendar and explore more functions.
                         </p>
                         <Link to="/login" className="btn-primary" style={{
                             padding: '12px 30px',
@@ -488,7 +553,7 @@ export default function Calendar() {
                             textDecoration: 'none',
                             display: 'inline-block'
                         }}>
-                            Go to Login
+                            Log In to Get Started
                         </Link>
                     </div>
                 </div>

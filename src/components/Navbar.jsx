@@ -261,6 +261,9 @@ export default function Navbar() {
                             <Nav.Link as={NavLink} to="/calendar" className="nav-link-custom">
                                 Calendar
                             </Nav.Link>
+                            <Nav.Link as={NavLink} to="/checkin" className="nav-link-custom">
+                                Check In
+                            </Nav.Link>
                         </Nav>
                     </BSNavbar.Collapse>
                 </Container>

@@ -451,3 +451,99 @@ body.night-mode .day-cell {
     align-items: center;
     border-left: 4px solid var(--primary-color);
 }
+
+/* Day View Header */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    /* Add padding below header */
+}
+
+/* Daily Sticker Styles */
+.day-cell {
+    position: relative;
+    /* Ensure overlapping works */
+}
+
+.day-sticker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    /* Standard sticker size */
+    line-height: 1;
+    z-index: 5;
+    /* Ensure it's on top of background */
+    opacity: 1;
+    /* Fully visible */
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.sticker-btn {
+    background: var(--bg-offset);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: var(--text-main);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 20px;
+    /* Extra spacing from title */
+}
+
+.sticker-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.sticker-picker-popover {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    /* Align right */
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sticker-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.sticker-option {
+    font-size: 1.5rem;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.sticker-option:hover {
+    background: var(--bg-offset);
+    transform: scale(1.2);
+}
+
+body.night-mode .sticker-picker-popover {
+    background: #1e293b;
+    border-color: rgba(255, 255, 255, 0.1);
+}
