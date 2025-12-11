@@ -25,11 +25,6 @@ export default function Login() {
                 return;
             }
 
-            if (!/^\d{7}$/.test(password)) {
-                setError('Password must be exactly 7 digits');
-                return;
-            }
-
             // Check if user already exists
             const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
             if (existingUsers[username]) {
@@ -64,25 +59,6 @@ export default function Login() {
         }
     };
 
-    const handlePasswordChange = (e) => {
-        const value = e.target.value;
-        if (isSignup) {
-            // Only allow digits and limit to 7 characters for signup
-            if (/^\d*$/.test(value) && value.length <= 7) {
-                setPassword(value);
-            }
-        } else {
-            // Allow any input for login
-            setPassword(value);
-        }
-    };
-
-    const handleConfirmPasswordChange = (e) => {
-        const value = e.target.value;
-        if (/^\d*$/.test(value) && value.length <= 7) {
-            setConfirmPassword(value);
-        }
-    };
 
     return (
         <div style={{
@@ -136,28 +112,21 @@ export default function Login() {
 
                         <div className="mb-3">
                             <label className="form-label" style={{ fontWeight: '600' }}>
-                                Password {isSignup && <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>(7 digits)</span>}
+                                Password
                             </label>
                             <input
                                 type={isSignup ? "text" : "password"}
                                 className="form-control"
                                 value={password}
-                                onChange={handlePasswordChange}
-                                placeholder={isSignup ? "7-digit password" : "Enter password"}
-                                maxLength={isSignup ? "7" : undefined}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter password"
                                 style={{
                                     padding: '12px',
                                     borderRadius: '12px',
                                     border: '1px solid var(--glass-border)',
-                                    background: 'rgba(255,255,255,0.5)',
-                                    letterSpacing: isSignup ? '2px' : 'normal'
+                                    background: 'rgba(255,255,255,0.5)'
                                 }}
                             />
-                            {isSignup && (
-                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '5px' }}>
-                                    {password.length}/7 digits entered
-                                </div>
-                            )}
                         </div>
 
                         {isSignup && (
@@ -167,15 +136,13 @@ export default function Login() {
                                     type="text"
                                     className="form-control"
                                     value={confirmPassword}
-                                    onChange={handleConfirmPasswordChange}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                     placeholder="Re-enter password"
-                                    maxLength="7"
                                     style={{
                                         padding: '12px',
                                         borderRadius: '12px',
                                         border: '1px solid var(--glass-border)',
-                                        background: 'rgba(255,255,255,0.5)',
-                                        letterSpacing: '2px'
+                                        background: 'rgba(255,255,255,0.5)'
                                     }}
                                 />
                                 {confirmPassword && password !== confirmPassword && (

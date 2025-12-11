@@ -245,7 +245,7 @@ export default function CheckIn() {
                                 </div>
                                 <h3 style={{ color: 'var(--text-main)', margin: '10px 0' }}>{room.title}</h3>
                                 <p style={{ color: 'var(--text-secondary)', marginBottom: '15px' }}>{room.description}</p>
-                                
+
                                 {isUserInRoom(room) ? (
                                     <>
                                         <Button
@@ -354,7 +354,7 @@ export default function CheckIn() {
                             {userRooms.map(room => (
                                 <div key={room.id} className="glass-card" style={{ padding: '24px' }}>
                                     <h3 style={{ color: 'var(--text-main)', marginBottom: '15px' }}>{room.title}</h3>
-                                    
+
                                     {/* Improvement Grid */}
                                     <div style={{ marginBottom: '20px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -389,18 +389,18 @@ export default function CheckIn() {
                                                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                                                 const checkIns = room.checkIns?.[currentUser] || [];
                                                 const days = [];
-                                                
+
                                                 for (let i = 0; i < firstDay; i++) {
                                                     days.push(null);
                                                 }
-                                                
+
                                                 for (let day = 1; day <= daysInMonth; day++) {
                                                     const date = new Date(year, month, day);
                                                     const dateStr = date.toDateString();
                                                     const isCheckedIn = checkIns.includes(dateStr);
                                                     days.push({ day, dateStr, isCheckedIn });
                                                 }
-                                                
+
                                                 return days.map((item, idx) => {
                                                     if (!item) {
                                                         return <div key={`empty-${idx}`} style={{ aspectRatio: '1' }} />;
@@ -428,7 +428,7 @@ export default function CheckIn() {
                                             })()}
                                         </div>
                                     </div>
-                                    
+
                                     {/* Members Progress Grid */}
                                     <div style={{ marginBottom: '20px' }}>
                                         <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '12px' }}>Team Check-ins</div>
@@ -447,18 +447,18 @@ export default function CheckIn() {
                                                             const firstDay = new Date(year, month, 1).getDay();
                                                             const daysInMonth = new Date(year, month + 1, 0).getDate();
                                                             const days = [];
-                                                            
+
                                                             for (let i = 0; i < firstDay; i++) {
                                                                 days.push(null);
                                                             }
-                                                            
+
                                                             for (let day = 1; day <= daysInMonth; day++) {
                                                                 const date = new Date(year, month, day);
                                                                 const dateStr = date.toDateString();
                                                                 const isCheckedIn = memberCheckIns.includes(dateStr);
                                                                 days.push({ day, isCheckedIn });
                                                             }
-                                                            
+
                                                             return days.map((item, idx) => {
                                                                 if (!item) {
                                                                     return <div key={`empty-${idx}`} style={{ aspectRatio: '1' }} />;
