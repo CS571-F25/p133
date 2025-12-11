@@ -178,7 +178,7 @@ export default function CheckIn() {
                 <Navbar />
                 <div style={{ marginTop: '80px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
                     <div className="glass-card" style={{ padding: '60px 40px', textAlign: 'center', maxWidth: '500px', borderRadius: '20px' }}>
-                        <h2 style={{ color: 'var(--text-main)', marginBottom: '20px' }}>Log In Required</h2>
+                        <h1 style={{ color: 'var(--text-main)', marginBottom: '20px', fontSize: '2rem' }}>Log In Required</h1>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '30px', fontSize: '1.1rem' }}>
                             Join and create accountability rooms, check in daily, and track your progress with the community!
                         </p>
@@ -217,8 +217,9 @@ export default function CheckIn() {
                                 type="text"
                                 placeholder="Search rooms..."
                                 value={searchQuery}
+                                aria-label="Search rooms"
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{ maxWidth: '300px', borderRadius: '20px', background: 'rgba(255,255,255,0.1)', color: 'var(--text-main)' }}
+                                style={{ maxWidth: '300px', borderRadius: '20px', background: 'rgba(255,255,255,0.1)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
                             />
                             <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
                                 {tags.map(tag => (
@@ -257,10 +258,10 @@ export default function CheckIn() {
                                 }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                    <Badge bg="info">{room.tag}</Badge>
+                                    <Badge bg="info" text="dark">{room.tag}</Badge>
                                     <span style={{ color: 'var(--text-secondary)' }}>👥 {room.members.length}</span>
                                 </div>
-                                <h3 style={{ color: 'var(--text-main)', margin: '10px 0' }}>{room.title}</h3>
+                                <h2 style={{ color: 'var(--text-main)', margin: '10px 0', fontSize: '1.5rem' }}>{room.title}</h2>
                                 <p style={{ color: 'var(--text-secondary)', marginBottom: '15px' }}>{room.description}</p>
 
                                 {isUserInRoom(room) ? (
@@ -370,7 +371,7 @@ export default function CheckIn() {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
                             {userRooms.map(room => (
                                 <div key={room.id} className="glass-card" style={{ padding: '24px' }}>
-                                    <h3 style={{ color: 'var(--text-main)', marginBottom: '15px' }}>{room.title}</h3>
+                                    <h2 style={{ color: 'var(--text-main)', marginBottom: '15px', fontSize: '1.5rem' }}>{room.title}</h2>
 
                                     {/* Improvement Grid */}
                                     <div style={{ marginBottom: '20px' }}>
@@ -396,7 +397,7 @@ export default function CheckIn() {
 
                                     {/* My Monthly Check-in Grid */}
                                     <div style={{ marginBottom: '20px' }}>
-                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}>Your Check-ins This Month</div>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: '8px' }}>Your Check-ins This Month</div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
                                             {(() => {
                                                 const today = new Date();
@@ -448,12 +449,12 @@ export default function CheckIn() {
 
                                     {/* Members Progress Grid */}
                                     <div style={{ marginBottom: '20px' }}>
-                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '12px' }}>Team Check-ins</div>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: '12px' }}>Team Check-ins</div>
                                         {room.members.map(member => {
                                             const memberCheckIns = room.checkIns?.[member] || [];
                                             return (
                                                 <div key={member} style={{ marginBottom: '12px' }}>
-                                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '4px' }}>
+                                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '4px' }}>
                                                         {member} • {memberCheckIns.length} check-ins
                                                     </div>
                                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px' }}>
@@ -500,9 +501,9 @@ export default function CheckIn() {
                                     </div>
 
                                     {/* Room Stats */}
-                                    <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', fontSize: '0.9rem' }}>
+                                    <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', fontSize: '1.1rem' }}>
                                         <Badge bg="secondary">👥 {room.members.length} members</Badge>
-                                        <Badge bg="info">{room.tag}</Badge>
+                                        <Badge bg="info" text="dark">{room.tag}</Badge>
                                     </div>
 
                                     <Button
@@ -533,7 +534,7 @@ export default function CheckIn() {
                     {/* Left: Messages */}
                     <div className="glass-card" style={{ flex: 2, display: 'flex', flexDirection: 'column', borderRadius: '16px' }}>
                         <div style={{ padding: '20px', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h2 style={{ color: 'var(--text-main)', margin: 0 }}>{selectedRoom.title}</h2>
+                            <h1 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.5rem' }}>{selectedRoom.title}</h1>
                             <Button onClick={() => setView('myrooms')} variant="outline-secondary" size="sm">
                                 ← Back
                             </Button>
@@ -581,6 +582,7 @@ export default function CheckIn() {
                                 type="text"
                                 placeholder="Send a message..."
                                 value={newMessage}
+                                aria-label="Type a message"
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                                 style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}
@@ -607,7 +609,7 @@ export default function CheckIn() {
                                     marginBottom: '8px'
                                 }}>
                                     <div style={{ color: 'var(--text-main)' }}>
-                                        {member} {member === selectedRoom.creator && <Badge bg="warning" className="ms-2">Owner</Badge>}
+                                        {member} {member === selectedRoom.creator && <Badge bg="warning" text="dark" className="ms-2">Owner</Badge>}
                                     </div>
                                     {(currentUser === selectedRoom.creator || currentUser === member) && (
                                         <Button

@@ -40,7 +40,7 @@ export default function SettingsModal({ show, onHide }) {
             </Modal.Header>
             <Modal.Body>
                 <Form>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-3" controlId="description">
                         <Form.Label style={{ color: 'var(--text-main)' }}>Description (About Me)</Form.Label>
                         <Form.Control
                             as="textarea"
@@ -57,7 +57,7 @@ export default function SettingsModal({ show, onHide }) {
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-3" controlId="hobbies">
                         <Form.Label style={{ color: 'var(--text-main)' }}>Hobbies & Interests</Form.Label>
                         <Form.Control
                             as="textarea"

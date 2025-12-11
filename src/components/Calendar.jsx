@@ -162,7 +162,7 @@ export default function Calendar() {
         if (viewMode === 'month') {
             return (
                 <div className="calendar-header-simple" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                    <h2 className="calendar-title" style={{ margin: 0 }}>{monthNames[month]}</h2>
+                    <h1 className="calendar-title" style={{ margin: 0, fontSize: '2rem' }}>{monthNames[month]}</h1>
 
                     {/* Integrated Year Navigator */}
                     <div className="year-navigator" style={{ margin: 0, justifyContent: 'flex-end', width: 'auto' }}>
@@ -430,7 +430,7 @@ export default function Calendar() {
         return (
             <div className="main-content-wrapper day-mode-content" style={{ height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column' }}>
                 <div className="calendar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 className="calendar-title">{dayNames[dateObj.getDay()]}, {monthNames[month]} {selectedDate}</h2>
+                    <h1 className="calendar-title">{dayNames[dateObj.getDay()]}, {monthNames[month]} {selectedDate}</h1>
 
                     <div style={{ position: 'relative' }}>
                         <button
@@ -518,7 +518,7 @@ export default function Calendar() {
                         textAlign: 'center',
                         maxWidth: '400px'
                     }}>
-                        <h2 style={{ marginBottom: '20px', color: 'var(--text-main)' }}>Log In Required</h2>
+                        <h1 style={{ marginBottom: '20px', color: 'var(--text-main)', fontSize: '2rem' }}>Log In Required</h1>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '30px' }}>
                             Log in to access your personal calendar and explore more functions.
                         </p>
